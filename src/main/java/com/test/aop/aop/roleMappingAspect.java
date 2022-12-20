@@ -1,6 +1,9 @@
 package com.test.aop.aop;
 
+import com.test.aop.config.Role;
 import com.test.aop.config.RoleMapping;
+import com.test.aop.service.AopService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -16,24 +19,30 @@ import java.util.Objects;
 @Slf4j
 @Aspect
 @Component
+@RequiredArgsConstructor
 public class roleMappingAspect {
+
+
+    private final AopService aopService;
 
     @Around("@annotation(com.test.aop.config.RoleMapping)")
     public Object sayRole(ProceedingJoinPoint pjp) throws Throwable {
 
         MethodSignature signature = (MethodSignature) pjp.getSignature();
-        String role = signature.getMethod().getDeclaredAnnotation(RoleMapping.class).visitorRole().getRole();
+        Role role = signature.getMethod().getDeclaredAnnotation(RoleMapping.class).visitorRole();
         log.info("AOP Success!");
         log.info("Role is " + role);
 
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
-        if (request.getHeader("X-Client-ID").isEmpty()) {
-            throw new RuntimeException("id is empty");
+        if (role.equals(Role.GUEST)) {
+            aopService.guestMakeSession();
+            return pjp.proceed();
         }
 
-        String header = request.getHeader("X-Client-ID");
+        if (role.equals(Role.USER)) {
+            aopService.guestValidateSession();
+            return pjp.proceed();
+        }
 
-        log.info("Header Name is " + header);
         return pjp.proceed();
     }
 }
