@@ -10,17 +10,12 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Objects;
 
 @Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
-public class roleMappingAspect {
+public class RoleMappingAspect {
 
 
     private final AopService aopService;
